@@ -19,14 +19,68 @@ json create_error_response(const std::string& error_message) {
     return response;
 }
 
-// State for our simple SSE streaming. 
+// State for our simple SSE streaming.
 // NOTE: static variables are not thread-safe. This is a simplified example for learning.
-// For a real multi-user server, you would need a more robust way to manage state per-request.
 static std::vector<std::string> sse_entries;
 static int sse_current_entry_index;
 
 int main() {
     httplib::Server svr;
+
+    // API Endpoint to describe the service itself
+    svr.Get("/help", [](const httplib::Request& req, httplib::Response& res) {
+        json help_json;
+        help_json["service"] = "MCP File System Service";
+        help_json["version"] = "1.1.0";
+        
+        json endpoints = json::array();
+
+        // Describe /list_directory
+        json list_dir;
+        list_dir["path"] = "/list_directory";
+        list_dir["method"] = "POST";
+        list_dir["description"] = "Lists the contents of a directory. Returns the contents in a single JSON response.";
+        list_dir["request_body"]["type"] = "application/json";
+        list_dir["request_body"]["schema"]["path"] = "string (absolute or relative path)";
+        endpoints.push_back(list_dir);
+
+        // Describe /create_directory
+        json create_dir;
+        create_dir["path"] = "/create_directory";
+        create_dir["method"] = "POST";
+        create_dir["description"] = "Creates a new directory at the specified path.";
+        create_dir["request_body"]["type"] = "application/json";
+        create_dir["request_body"]["schema"]["path"] = "string (path for the new directory)";
+        endpoints.push_back(create_dir);
+
+        // Describe /delete
+        json delete_item;
+        delete_item["path"] = "/delete";
+        delete_item["method"] = "POST";
+        delete_item["description"] = "Deletes a file or a directory (recursively). Restricted to subdirectories of the server's working directory.";
+        delete_item["request_body"]["type"] = "application/json";
+        delete_item["request_body"]["schema"]["path"] = "string (path to the item to delete)";
+        endpoints.push_back(delete_item);
+
+        // Describe /list_directory_stream
+        json list_stream;
+        list_stream["path"] = "/list_directory_stream";
+        list_stream["method"] = "GET";
+        list_stream["description"] = "Lists the contents of a directory using a Server-Sent Events (SSE) stream. Each entry is sent as a separate event.";
+        list_stream["query_parameters"]["path"] = "string (absolute or relative path, defaults to '.' )";
+        endpoints.push_back(list_stream);
+        
+        // Describe /help itself
+        json help_endpoint;
+        help_endpoint["path"] = "/help";
+        help_endpoint["method"] = "GET";
+        help_endpoint["description"] = "Returns this API description.";
+        endpoints.push_back(help_endpoint);
+
+        help_json["endpoints"] = endpoints;
+
+        res.set_content(help_json.dump(4), "application/json");
+    });
 
     // 1. Endpoint to list directory contents (Standard HTTP Request/Response)
     svr.Post("/list_directory", [](const httplib::Request& req, httplib::Response& res) {

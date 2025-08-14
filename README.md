@@ -75,6 +75,67 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 基于 `HTTP/SSE`实现，其中只有查看目录`list_directory_stream`是`SSE`。 (SSE:流式传输，不是等待返回全部token，而是一个token一个token的返回)
 
+#### 获取服务描述列表
+
+```json
+curl http://localhost:8081/help
+
+{
+    "endpoints": [
+        {
+            "description": "Lists the contents of a directory. Returns the contents in a single JSON response.",
+            "method": "POST",
+            "path": "/list_directory",
+            "request_body": {
+                "schema": {
+                    "path": "string (absolute or relative path)"
+                },
+                "type": "application/json"
+            }
+        },
+        {
+            "description": "Creates a new directory at the specified path.",
+            "method": "POST",
+            "path": "/create_directory",
+            "request_body": {
+                "schema": {
+                    "path": "string (path for the new directory)"
+                },
+                "type": "application/json"
+            }
+        },
+        {
+            "description": "Deletes a file or a directory (recursively). Restricted to subdirectories of the server's working directory.",
+            "method": "POST",
+            "path": "/delete",
+            "request_body": {
+                "schema": {
+                    "path": "string (path to the item to delete)"
+                },
+                "type": "application/json"
+            }
+        },
+        {
+            "description": "Lists the contents of a directory using a Server-Sent Events (SSE) stream. Each entry is sent as a separate event.",
+            "method": "GET",
+            "path": "/list_directory_stream",
+            "query_parameters": {
+                "path": "string (absolute or relative path, defaults to '.' )"
+            }
+        },
+        {
+            "description": "Returns this API description.",
+            "method": "GET",
+            "path": "/help"
+        }
+    ],
+    "service": "MCP File System Service",
+    "version": "1.1.0"
+}%        
+```
+
+#### 单个服务调用
+
 测试: `curl -N http://localhost:8081/list_directory_stream?path=.` （-N 或 --no-buffer 禁用缓冲区，流式场景使用，数据收到即发出）
 
 返回结果：
