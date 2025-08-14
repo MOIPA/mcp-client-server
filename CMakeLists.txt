@@ -32,14 +32,14 @@ else()
 endif()
 
 # 添加可执行文件
-add_executable(${PROJECT_NAME} 
-src/main.cpp
+add_executable(llm_server
+src/llm_server.cpp
 src/LLM.cpp
 )
 
 
 # 链接所有 .so 文件
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(llm_server
     PRIVATE
         ${LIBS}
         pthread
@@ -49,3 +49,13 @@ target_link_libraries(${PROJECT_NAME}
 # 设置运行时库路径（RPATH），让程序运行时能找到 .so 文件
 set(CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/lib")
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+# 添加新的 mcp_server 可执行文件
+add_executable(mcp_server src/mcp_server.cpp)
+
+# 为 mcp_server 链接库
+target_link_libraries(mcp_server
+    PRIVATE
+        pthread
+        stdc++fs
+)
