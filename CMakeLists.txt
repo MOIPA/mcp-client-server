@@ -34,7 +34,7 @@ endif()
 # 添加可执行文件
 add_executable(${PROJECT_NAME} 
 src/main.cpp
-src/encapsule.cpp
+src/LLM.cpp
 )
 
 

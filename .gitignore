@@ -31,3 +31,5 @@
 
 # models
 *.gguf
+
+build/
