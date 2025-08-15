@@ -17,6 +17,32 @@ cmake --build .
 
 LLM.cpp是基于llama.cpp，封装核心模型调用逻辑，编译完成后build目录下`llm_server`执行`./llm_server`启动大模型服务
 
+调用示例: ` curl -X POST http://localhost:8080/v1/chat/completions -H "Content-Type: application/json" -d '{"model": "my-llm","messages":"你好"}' `
+
+```json
+{
+    "choices": [
+        {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+                "content": "<think>\n嗯，用户发来的是“你好”，看起来是个简单的问候。首先，我需要确定用户是否需要帮助，或者只是想打招呼。根据之前的对话历史，用户可能是在测试我的反应，或者想开始一个对话。\n\n接下来，我要考虑如何回应才能既友好又专业。应该保持简洁，避免冗长，同时提供帮助。比如，可以回复“你好！有什么可以帮您的吗？”这样既亲切又开放，让用户知道他们可以随时提问。\n\n还要注意用户可能的意图，他们可能希望得到具体的帮助，或者只是想交流。所以回应需要足够灵活，让用户觉得被重视，同时又不会显得太冗长。另外，保持语气友好，使用表情符号可能增加亲和力，但根据之前的设定，可能不需要使用表情符号，所以保持文字简洁。\n\n最后，确保回应符合规范，不包含任何可能引起问题的信息，同时保持自然流畅。总结下来，一个合适的回应应该是简短、友好，并且开放式的，让用户有继续对话的意愿。\n</think>\n\n你好！有什么可以帮您的吗？",
+                "role": "assistant"
+            }
+        }
+    ],
+    "created": 1755237389,
+    "id": "chatcmpl-1755237389",
+    "model": "my-llm",
+    "object": "chat.completion",
+    "usage": {
+        "completion_tokens": 288,
+        "prompt_tokens": 1,
+        "total_tokens": 289
+    }
+}
+```
+
 ## 2. LLM API
 
 基于`cpp-httplib` 和 `nlohmann/json.hpp`实现 OpenAI 风格 API
@@ -205,7 +231,7 @@ curl: (18) transfer closed with outstanding read data remaining
 
 #### 使用示例:
 
-```bash
+```
 $ ./agent                                                                                      INT ✘  4m 53s   base   11:28:17  
 
 =========================================================
