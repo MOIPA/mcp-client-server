@@ -180,3 +180,68 @@ data: {}
 
 curl: (18) transfer closed with outstanding read data remaining                                           
 ```
+
+## 4. agent
+
+所依赖的服务启动后，即可启动agent服务: `./agent`
+
+依赖：
++ 支持openAi接口格式的llm服务：`./llm_server`
++ 支持mcp格式以及传输协议的工具服务：`./mcp_server`
+
+#### 记忆问题
+
+#### 模型和工具兼容性问题
+
+模型根据工具描述输出的json格式健壮性问题，需要更好的extract，如果模型有think怎么办，不能提取错东西
+
+
+#### 使用示例:
+
+```bash
+$ ./agent                                                                                      INT ✘  4m 53s   base   11:28:17  
+
+=========================================================
+            MCP Agent (Conversational)                 
+=========================================================
+Enter your command, or type 'exit' or 'quit' to leave.
+
+YOU: 当前目录下有什么
+[Agent] Getting available tools...
+[Agent] Asking LLM to choose a tool...
+[Agent] LLM chose tool: <think>
+Okay, the user asked, "当前目录下有什么" which means "What's in the current directory?" So I need to use the tool that lists directory contents. The available tools include "/list_directory" which takes a path parameter. Since the user mentioned "当前目录", the path should be the current directory, which is "." by default. So the tool_name is "list_directory" and parameters {"path": "."}.
+</think>
+
+{
+  "tool_name": "list_directory",
+  "parameters": {
+    "path": "."
+  }
+}
+[Agent] Executing tool '/list_directory'...
+[Agent] Asking LLM to generate final response...
+
+AGENT: <think>
+Okay, let's see. The user asked, "当前目录下有什么" which means "What's in the current directory?" The tool provided a response with the contents array.
+
+So, the user wants to know the files and folders in their current directory. The tool's result shows that the directory has several files and folders. I need to list them in a friendly way. Let me check the contents again: CMakeFiles, mcp_server, agent, CMakeCache.txt, llm, Makefile, llm_server, cmake_install.cmake. 
+
+I should present these in a clear, natural language format. Maybe start by stating that the current directory contains these items, then list them each with a brief description. Make sure to mention that they can ask for more info if needed. Keep it simple and conversational.
+</think>
+
+当前目录下包含以下内容：  
+- `CMakeFiles`  
+- `mcp_server`  
+- `agent`  
+- `CMakeCache.txt`  
+- `llm`  
+- `Makefile`  
+- `llm_server`  
+- `cmake_install.cmake`  
+
+如果需要更详细的说明，欢迎随时问我！
+
+YOU: 
+
+```
