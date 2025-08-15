@@ -77,8 +77,9 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 #### 获取服务描述列表
 
+`curl http://localhost:8081/help`
+
 ```json
-curl http://localhost:8081/help
 
 {
     "endpoints": [
@@ -131,10 +132,17 @@ curl http://localhost:8081/help
     ],
     "service": "MCP File System Service",
     "version": "1.1.0"
-}%        
+}
 ```
 
 #### 单个服务调用
+
+测试:
+```bash
+curl -X POST http://localhost:8081/list_directory \
+   -H "Content-Type: application/json" \
+   -d '{"path": "."}'
+```
 
 测试: `curl -N http://localhost:8081/list_directory_stream?path=.` （-N 或 --no-buffer 禁用缓冲区，流式场景使用，数据收到即发出）
 

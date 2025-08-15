@@ -59,3 +59,14 @@ target_link_libraries(mcp_server
         pthread
         stdc++fs
 )
+
+# 添加 agent 可执行文件
+add_executable(agent src/agent.cpp)
+
+# 为 agent 链接库
+target_link_libraries(agent
+    PRIVATE
+        pthread
+        stdc++fs
+)
+
