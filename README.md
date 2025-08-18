@@ -95,6 +95,8 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ## 3. mcp-server
 
+无状态服务，不支持多用户session_id，只是个简单示例
+
 启动支持`HTTP/SSE`的服务器：`./mcp_server`（编译后输出的可执行文件）
 
 用于测试的mcp服务，操控本地目录，可以查看本地目录，删除本地目录，创建本地目录

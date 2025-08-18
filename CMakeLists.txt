@@ -70,3 +70,29 @@ target_link_libraries(agent
         stdc++fs
 )
 
+# 添加 browser_agent 可执行文件
+add_executable(browser_agent src/browser_agent_real.cpp)
+
+# 为 browser_agent 链接库
+target_link_libraries(browser_agent
+    PRIVATE
+        pthread
+        stdc++fs
+        ssl
+        crypto
+)
+
+# 添加 https_test 可执行文件
+add_executable(https_test src/https_test.cpp)
+
+# 为 https_test 链接库
+target_link_libraries(https_test
+    PRIVATE
+        pthread
+        ssl
+        crypto
+)
+
+
+
+
