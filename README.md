@@ -282,3 +282,7 @@ I should present these in a clear, natural language format. Maybe start by stati
 YOU: 
 
 ```
+
+## browser_agent
+
+`browser_agent_real.cpp` 是对支持MCP协议的实际外部服务的调用示例
