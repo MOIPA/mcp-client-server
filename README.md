@@ -2,7 +2,9 @@
 
 基于`llama.cpp`,`cpp-httplib`,`nlohmann/json.hpp`
 
-from scratch的方式实现mcp-server，llm，client 从头实现mcp协议的整个流程
+from scratch的方式实现mcp-server，llm，client 从头实现mcp协议的整个流程，非标准的MCP实现。
+
+正标准MCP协议信息格式是`json-RPC`，传输层是`stdio`或者`SSE`长连接推送消息，`HTTP/POST`请求调用或者资源，还有会话和认证管理等，本实现更多是架构上的简单模拟实现。
 
 使用
 

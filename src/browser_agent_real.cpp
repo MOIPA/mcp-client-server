@@ -17,6 +17,8 @@ using json = nlohmann::json;
 const std::string EXTERNAL_MCP_SSE_URL = "https://web-mcp.koyeb.app/sse/e86f79f2-f0c4-40e1-ae33-b701bb3959a7";
 const std::string EXTERNAL_MCP_BASE_URL = "https://web-mcp.koyeb.app";
 const std::string LLM_SERVICE_URL = "http://localhost:8080";
+const std::string PROXY_HOST = "proxyhk.zte.com.cn";
+const int PROXY_PORT = 80;
 
 struct SharedState {
     std::mutex mtx;
@@ -39,6 +41,9 @@ json create_json_rpc_body(const std::string& method, const json& params, int id)
 
 void sse_worker_thread(SharedState& state) {
     httplib::Client sse_client(EXTERNAL_MCP_BASE_URL.c_str());
+    sse_client.set_proxy(PROXY_HOST.c_str(), PROXY_PORT);
+    sse_client.enable_server_certificate_verification(false);
+    // sse_client.set_version("HTTP/1.1"); // Force HTTP/1.1
     sse_client.set_read_timeout(0);
 
     httplib::Headers headers;
@@ -78,7 +83,7 @@ void sse_worker_thread(SharedState& state) {
     if (!res || res->status != 200) {
         std::unique_lock<std::mutex> lock(state.mtx);
         state.has_error = true;
-        state.error_message = "Failed to connect to SSE endpoint. Status: " + std::to_string(res ? res->status : -1);
+        state.error_message = "Failed to connect to SSE endpoint. Status: " + std::to_string(res ? res->status : -1) + ", Error: " + httplib::to_string(res.error());
         lock.unlock();
         state.cv.notify_all();
     }
@@ -114,6 +119,9 @@ int main() {
     }
 
     httplib::Client mcp_client(EXTERNAL_MCP_BASE_URL.c_str());
+    mcp_client.set_proxy(PROXY_HOST.c_str(), PROXY_PORT);
+    mcp_client.enable_server_certificate_verification(false);
+
     httplib::Client llm_client(LLM_SERVICE_URL.c_str());
     llm_client.set_connection_timeout(600);
 
@@ -123,7 +131,7 @@ int main() {
         json rpc_body = create_json_rpc_body("tools/list", {{"_meta", {{"progressToken", 1}}}}, tools_list_id);
         httplib::Headers headers;
         auto res = mcp_client.Post(state.session_path.c_str(), headers, rpc_body.dump(), "application/json");
-        if (!res || res->status != 200) { std::cerr << "[Agent] Fatal: Failed to send tools/list request." << std::endl; return 1; }
+        if (!res || res->status != 200) { std::cerr << "[Agent] Fatal: Failed to send tools/list request. Status: " << (res ? res->status : -1) << ", Error: " << httplib::to_string(res.error()) << std::endl; return 1; }
 
         std::cout << "[Agent] Discovering tools..." << std::endl;
         std::unique_lock<std::mutex> lock(state.mtx);
@@ -137,7 +145,7 @@ int main() {
     }
 
     std::cout << "\n=========================================================" << std::endl;
-    std::cout << "      Browser Automation Agent (Final Corrected Version)       " << std::endl;
+    std::cout << "      Browser Automation Agent (Definitive Version)    " << std::endl;
     std::cout << "=========================================================" << std::endl;
 
     int request_id_counter = 2;
@@ -180,7 +188,7 @@ int main() {
         json rpc_body = create_json_rpc_body(tool_method, tool_params, current_request_id);
         httplib::Headers tool_headers;
         auto tool_res = mcp_client.Post(state.session_path.c_str(), tool_headers, rpc_body.dump(), "application/json");
-        if (!tool_res || tool_res->status != 200) { std::cerr << "[Agent] Error: Tool POST failed." << std::endl; continue; }
+        if (!tool_res || tool_res->status != 200) { std::cerr << "[Agent] Error: Tool POST failed. Status: " << (tool_res ? tool_res->status : -1) << ", Error: " << httplib::to_string(tool_res.error()) << std::endl; continue; }
 
         std::cout << "[Agent] Command sent. Waiting for result..." << std::endl;
         json final_tool_result;
@@ -201,8 +209,10 @@ int main() {
 
         std::string prompt_for_final_answer =
             "Based on the user request and the tool result, formulate a friendly response.\n\n"
-            "--- USER REQUEST ---\n" + user_prompt + "\n\n"
-            "--- TOOL RESULT ---\n" + final_tool_result.dump(2) + "\n\n"
+            "--- USER REQUEST ---\n"
+            + user_prompt + "\n\n"
+            "--- TOOL RESULT ---\n"
+            + final_tool_result.dump(2) + "\n\n"
             "Provide a final response.";
 
         llm_req_body["messages"] = prompt_for_final_answer;

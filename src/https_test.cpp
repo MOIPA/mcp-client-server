@@ -1,10 +1,13 @@
 #define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib_old.h"
 #include <iostream>
-
+const std::string PROXY_HOST = "proxyhk.zte.com.cn";
+const int PROXY_PORT = 80;
 int main() {
     httplib::Client cli("https://web-mcp.koyeb.app");
-
+    cli.set_proxy(PROXY_HOST.c_str(), PROXY_PORT);
+    cli.enable_server_certificate_verification(false);
+    cli.set_read_timeout(0); // Set to 0 for no timeout, useful for SSE
     cli.set_logger([](const httplib::Request &req, const httplib::Response &res) {
         std::cout << "[Logger] Request: " << req.method << " " << req.path << std::endl;
         std::cout << "[Logger] Response Status: " << res.status << std::endl;
